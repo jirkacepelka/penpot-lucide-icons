@@ -15,10 +15,12 @@
     "allowJs": true,
     "checkJs": true,
     "moduleDetection": "force",
+    "resolveJsonModule": true,
     "composite": true,
     "paths": {
       "$lib/*": ["./src/lib/*"],
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"]
+  "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
+  "exclude": ["src/**/*.penpot.ts", "src/types/penpot.d.ts"]
 }

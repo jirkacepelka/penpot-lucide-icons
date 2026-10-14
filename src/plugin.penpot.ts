@@ -1,13 +1,15 @@
-import { type MessageTheme } from "./messages/theme-change.message";
-import { SendIconSchema } from "./messages/send-icon.message";
-import { parse } from "valibot";
+import * as v from "valibot";
+import type { MessageTheme } from "./messages/theme-change.message";
+import { InsertIconSchema } from "./messages/insert-icon.message";
+import type { InsertResult } from "./messages/insert-result.message";
+import { insertIcon } from "./insert-icon.penpot";
 
-penpot.ui.open("penpot-lucide-icons", "", {
-  height: 500,
-  width: 333,
+penpot.ui.open("Lucide Icons", "", {
+  width: 340,
+  height: 560,
 });
 
-penpot.on("themechange", (theme: "light" | "dark") =>
+penpot.on("themechange", (theme) =>
   penpot.ui.sendMessage({
     __type: "theme-change",
     theme,
@@ -15,26 +17,19 @@ penpot.on("themechange", (theme: "light" | "dark") =>
 );
 
 penpot.ui.onMessage((data) => {
-  const sendIcon = parse(SendIconSchema, data);
-  const shape = penpot.createShapeFromSvg(sendIcon.svg);
+  const message = v.safeParse(InsertIconSchema, data);
 
-  
-  if (!shape) return;
+  if (!message.success) return;
 
-  shape.name = `lucide/${sendIcon.title}`
+  const { name, svg, settings } = message.output;
+  let error: string | undefined;
 
-  const selection = penpot.selection;
-
-  if (selection.length > 0) {
-    // If they have something selected, center the icon relative to that target
-    const target = selection[0];
-    shape.x = Math.round(target.x + (target.width / 2) - (shape.width / 2));
-    shape.y = Math.round(target.y + (target.height / 2) - (shape.height / 2));
-  } else {
-    // Otherwise, center it perfectly in their screen
-    shape.x = Math.round(penpot.viewport.center.x - (shape.width / 2));
-    shape.y = Math.round(penpot.viewport.center.y - (shape.height / 2));
+  try {
+    insertIcon(name, svg, settings);
+  } catch (e) {
+    console.error(e);
+    error = e instanceof Error ? e.message : String(e);
   }
 
-  penpot.selection = [shape];
+  penpot.ui.sendMessage({ __type: "insert-result", name, error } satisfies InsertResult);
 });
