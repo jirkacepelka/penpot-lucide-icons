@@ -1,10 +1,7 @@
 import { defineConfig, build, type Plugin } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
 import generateFile from "vite-plugin-generate-file";
-import {
-  getPenpotManifest,
-  getPluginJsPath,
-} from "./penpot.manifest.ts";
+import { getPenpotManifest } from "./penpot.manifest.ts";
 import tailwindcss from "@tailwindcss/vite";
 
 export function pluginDevServe(): Plugin {
@@ -18,13 +15,14 @@ export function pluginDevServe(): Plugin {
             // Bundle the file on-the-fly using Rollup/Vite core
             const bundleResult = await build({
               root: server.config.root,
+              configFile: false,
               logLevel: "silent",
               build: {
                 write: false,
-                rollupOptions: {
+                rolldownOptions: {
                   input: "./src/plugin.penpot.ts",
                   output: {
-                    format: "module",
+                    format: "iife",
                     name: "penpotPlugin",
                   },
                   // Prevent Rollup from throwing errors over the global 'penpot' object
@@ -90,10 +88,10 @@ export function pluginBuildForProduction(): Plugin {
 }
 
 export default defineConfig(() => {
-  const pluginJsPath = getPluginJsPath();
-
   return {
-    base: process.argv.includes('dev') ? '' : process.env.BASE_PATH ?? "",
+    // Everything is referenced relatively, so the plugin works from any
+    // sub-path (e.g. GitHub Pages) without configuration.
+    base: "./",
     plugins: [
       svelte(),
       tailwindcss(),
@@ -101,7 +99,7 @@ export default defineConfig(() => {
         {
           type: "json",
           output: "./manifest.json",
-          data: getPenpotManifest(pluginJsPath),
+          data: getPenpotManifest(),
         },
       ]),
       pluginDevServe(),

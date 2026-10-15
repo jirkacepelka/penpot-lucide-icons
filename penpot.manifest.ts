@@ -20,20 +20,11 @@ export interface PenpotManifest {
   permissions?: PenpotPermission[];
 }
 
-export function getPluginJsPath() {
-  const base = process.argv.includes('dev') ? '' : process.env.BASE_PATH ?? "";
-
-  if (base !== '') {
-    return `${base}/plugin.js`;
-  }
-
-  return "plugin.js";
-}
-
-export function getPenpotManifest(pluginJsPath: string): PenpotManifest {
+export function getPenpotManifest(): PenpotManifest {
   return {
-    name: packageJson.name,
-    code: pluginJsPath,
+    name: "Lucide Icons",
+    // Resolved by Penpot relative to the manifest URL.
+    code: "plugin.js",
     description: packageJson.description,
     icon: "logo.png",
     version: 2,

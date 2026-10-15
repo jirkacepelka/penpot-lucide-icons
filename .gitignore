@@ -1,5 +1,5 @@
-lucide-ignore
-index-table.json
+scripts/lucide-ignore
+src/lib/lucide.json
 
 # Logs
 logs
